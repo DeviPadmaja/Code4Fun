@@ -1,4 +1,6 @@
-from fabric.api import local
+from __future__ import with_statement
+from fabric.api import local,settings, abort
+from fabric.contrib.console import confirm
 
 def hello(name="world"):
     print "Hello %s" % (name)
@@ -11,9 +13,14 @@ def endCry():
 
 def prepare():
     local("python echo.py")
-    raise Exception("yo")
+    exit(1)
 
 def do_task():
     startCry()
-    prepare()
+    with settings(warn_only=True):
+        result = local("python echo.py")
+    if result.failed and not confirm("Test failed. Do you want to continue ?"):
+        abort("Quitting")
     endCry()
+    
+
